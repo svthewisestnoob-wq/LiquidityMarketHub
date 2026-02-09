@@ -2,62 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LiquidMarketHub | Transaction Fix</title>
+    <title>LiquidMarketHub | Hardened Transaction Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-database-compat.js"></script>
     <style>
         [x-cloak] { display: none !important; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 10px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-[#05070a] text-slate-300 font-sans h-screen flex overflow-hidden" x-data="marketApp()">
 
-    <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="bg-[#0f1218] border-r border-white/5 flex flex-col transition-all duration-300">
+    <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="bg-[#0f1218] border-r border-white/5 flex flex-col transition-all duration-300 shadow-2xl z-50">
         <div class="p-6 flex items-center justify-between">
-            <h1 x-show="sidebarOpen" class="text-white font-black italic text-sm tracking-tighter uppercase">Liquid Hub</h1>
+            <h1 x-show="sidebarOpen" class="text-white font-black italic text-sm tracking-tighter uppercase">LIQUID HUB</h1>
             <button @click="sidebarOpen = !sidebarOpen" class="p-2 hover:bg-white/5 rounded-lg text-white">☰</button>
         </div>
         <nav class="mt-10 flex-1 px-4 space-y-4">
-            <button @click="view = 'market'" :class="view === 'market' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-400'" class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
+            <button @click="view = 'market'" :class="view === 'market' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400'" class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
                 <span>🛒</span> <span x-show="sidebarOpen" class="text-[10px] font-black uppercase tracking-widest">Market</span>
             </button>
-            <button @click="view = 'chats'" :class="view === 'chats' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-400'" class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
+            <button @click="view = 'chats'" :class="view === 'chats' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400'" class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
                 <span>💬</span> <span x-show="sidebarOpen" class="text-[10px] font-black uppercase tracking-widest">Chats</span>
             </button>
         </nav>
     </aside>
 
-    <main class="flex-1 overflow-y-auto p-8">
+    <main class="flex-1 overflow-y-auto p-8 relative">
         <template x-if="view === 'market'">
-            <div>
+            <div x-cloak>
                 <header class="mb-10 flex justify-between items-end">
                     <div>
-                        <h2 class="text-5xl font-black text-white italic tracking-tighter">LIQUIDITY</h2>
-                        <p class="text-blue-500 text-[10px] font-mono mt-1 font-bold tracking-widest" x-text="'CONNECTED_AS: ' + myId"></p>
+                        <h2 class="text-5xl font-black text-white italic tracking-tighter">MARKET DEPTH</h2>
+                        <p class="text-blue-500 text-[10px] font-mono mt-1 font-bold" x-text="'USER_ID: ' + myId"></p>
                     </div>
-                    <button @click="showPostModal = true" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase shadow-2xl hover:bg-blue-500 transition-all">Post Listing +</button>
+                    <button @click="showPostModal = true" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase shadow-2xl hover:scale-105 transition-all">Post Listing +</button>
                 </header>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <template x-for="order in orders" :key="order.id">
-                        <div class="bg-[#0f1218] border border-white/5 rounded-[40px] overflow-hidden hover:border-blue-500/40 transition-all flex flex-col shadow-2xl">
-                            <div class="h-48 bg-black/40 relative">
+                        <div class="bg-[#0f1218] border border-white/5 rounded-[40px] overflow-hidden hover:border-blue-500 transition-all flex flex-col shadow-2xl group">
+                            <div class="h-52 bg-black/40 relative overflow-hidden">
                                 <template x-if="order.img">
-                                    <img :src="order.img" class="w-full h-full object-cover opacity-80">
+                                    <img :src="order.img" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500">
                                 </template>
-                                <div class="absolute top-5 left-5 px-4 py-1.5 bg-black/90 rounded-full border border-white/10 text-[9px] font-black uppercase text-white backdrop-blur-md" x-text="order.ownerId === myId ? order.type + ' (OWNER)' : order.type"></div>
+                                <div class="absolute top-5 left-5 px-4 py-2 bg-black/90 rounded-full border border-white/10 text-[9px] font-black uppercase text-white" x-text="order.ownerId === myId ? order.type + ' (YOU)' : order.type"></div>
                             </div>
                             <div class="p-8">
                                 <div class="flex justify-between items-start mb-2">
                                     <h3 class="text-white font-black text-xl uppercase tracking-tighter" x-text="order.item"></h3>
                                     <span class="text-2xl font-black font-mono text-blue-500" x-text="'$' + order.price"></span>
                                 </div>
-                                <p class="text-green-400 text-[10px] font-bold mb-6 uppercase" x-show="order.currentBid" x-text="'High Bid: $' + order.currentBid"></p>
+                                <p class="text-green-400 text-[10px] font-bold mb-6 uppercase tracking-widest" x-show="order.currentBid" x-text="'High Bid: $' + order.currentBid"></p>
                                 <div class="flex gap-3">
-                                    <button @click="selectedOrder = order" class="flex-1 bg-white text-black py-4 rounded-2xl font-black text-[10px] uppercase hover:bg-blue-600 hover:text-white transition-all">Interact</button>
+                                    <button @click="selectedOrder = order" class="flex-1 bg-white text-black py-4 rounded-2xl font-black text-[10px] uppercase hover:bg-blue-600 hover:text-white transition-all">Trade Hub</button>
                                     <button @click="openChat(order)" class="px-6 bg-white/5 border border-white/10 text-white py-4 rounded-2xl hover:bg-blue-600 transition-all">💬</button>
                                 </div>
                             </div>
@@ -68,29 +68,29 @@
         </template>
 
         <template x-if="view === 'chats'">
-            <div class="h-full flex flex-col">
-                <h2 class="text-3xl font-black text-white mb-8 uppercase italic">Direct Messages</h2>
-                <div class="flex-1 bg-[#0f1218] rounded-[40px] border border-white/5 flex flex-col md:flex-row overflow-hidden">
+            <div class="h-full flex flex-col" x-cloak>
+                <h2 class="text-3xl font-black text-white mb-8 uppercase italic">Conversations</h2>
+                <div class="flex-1 bg-[#0f1218] rounded-[40px] border border-white/5 flex flex-col md:flex-row overflow-hidden shadow-2xl">
                     <div class="w-full md:w-80 border-r border-white/5 p-6 overflow-y-auto bg-black/20">
                         <template x-for="chat in chatRooms" :key="chat.id">
                             <div @click="activeChat = chat" :class="activeChat?.id === chat.id ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-white/5 text-slate-400'" class="p-5 rounded-[24px] cursor-pointer mb-3 transition-all">
                                 <p class="text-[11px] font-black uppercase tracking-widest" x-text="chat.item"></p>
-                                <p class="text-[9px] opacity-60 mt-1">Transaction Chat</p>
+                                <p class="text-[9px] opacity-60 mt-1">Chatting with Counterparty</p>
                             </div>
                         </template>
                     </div>
-                    <div class="flex-1 flex flex-col">
+                    <div class="flex-1 flex flex-col bg-black/10">
                         <template x-if="activeChat">
                             <div class="flex flex-col h-full p-8">
                                 <div class="flex-1 overflow-y-auto space-y-4 mb-6 pr-4" id="chat-box">
                                     <template x-for="msg in activeChatMessages" :key="msg.id">
-                                        <div :class="msg.sender === myId ? 'ml-auto bg-blue-600 text-white shadow-blue-600/20' : 'mr-auto bg-white/5 text-slate-300'" class="max-w-[75%] p-5 rounded-[24px]">
+                                        <div :class="msg.sender === myId ? 'ml-auto bg-blue-600 text-white' : 'mr-auto bg-white/5 text-slate-300'" class="max-w-[75%] p-5 rounded-[24px]">
                                             <p class="text-sm font-medium" x-text="msg.text"></p>
                                         </div>
                                     </template>
                                 </div>
                                 <div class="flex gap-3">
-                                    <input type="text" x-model="chatInput" @keyup.enter="sendChatMsg" placeholder="Type message..." class="bg-black/50 border border-white/10 p-5 rounded-2xl flex-1 outline-none text-sm text-white focus:border-blue-600">
+                                    <input type="text" x-model="chatInput" @keyup.enter="sendChatMsg" placeholder="Send message..." class="bg-black/50 border border-white/10 p-5 rounded-2xl flex-1 outline-none text-sm text-white focus:border-blue-600 transition-all">
                                     <button @click="sendChatMsg" class="bg-blue-600 text-white px-10 rounded-2xl font-black uppercase text-[10px] tracking-widest">Send</button>
                                 </div>
                             </div>
@@ -101,43 +101,19 @@
         </template>
     </main>
 
-    <div x-show="showPostModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 backdrop-blur-2xl">
-        <div class="bg-[#0f1218] border border-white/10 w-full max-w-xl p-12 rounded-[50px]" @click.away="showPostModal = false">
-            <h2 class="text-3xl font-black text-white mb-8 uppercase italic tracking-tighter">Create Listing</h2>
-            <div class="space-y-5">
-                <div class="grid grid-cols-2 gap-5">
-                    <input type="text" x-model="newItem" placeholder="Item Name" class="bg-black border border-white/10 p-5 rounded-2xl outline-none text-white text-sm">
-                    <input type="number" x-model="newPrice" placeholder="Price ($)" class="bg-black border border-white/10 p-5 rounded-2xl outline-none text-white text-sm font-mono">
-                </div>
-                <textarea x-model="newDesc" placeholder="Description..." class="w-full bg-black border border-white/10 p-5 rounded-2xl h-32 outline-none text-white text-sm"></textarea>
-                <div class="bg-blue-600/5 border border-blue-600/20 p-5 rounded-2xl">
-                    <p class="text-[10px] text-blue-400 font-black mb-2 uppercase">Image Link</p>
-                    <input type="text" x-model="newImgUrl" placeholder="https://..." class="bg-black border border-white/10 p-4 rounded-xl w-full outline-none text-white text-xs font-mono">
-                </div>
-                <div class="flex gap-4 pt-4">
-                    <select x-model="newType" class="bg-black border border-white/10 p-5 rounded-2xl outline-none text-[10px] font-bold text-slate-400">
-                        <option value="SELL">I AM SELLING</option>
-                        <option value="BUY">I AM BUYING</option>
-                    </select>
-                    <button @click="addOrder" class="flex-1 bg-blue-600 text-white py-5 rounded-2xl font-black text-[10px] uppercase">Confirm Post</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div x-show="selectedOrder" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/95 backdrop-blur-md">
-        <div class="bg-[#0f1218] border border-white/10 w-full max-w-lg p-12 rounded-[50px] shadow-2xl" @click.away="selectedOrder = null">
+        <div class="bg-[#0f1218] border border-white/10 w-full max-w-lg p-10 rounded-[50px] shadow-2xl" @click.away="selectedOrder = null">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-2xl font-black text-white uppercase italic tracking-widest" x-text="selectedOrder?.item"></h2>
-                <button @click="selectedOrder = null" class="text-slate-500 hover:text-white text-4xl">&times;</button>
+                <button @click="selectedOrder = null" class="text-slate-500 hover:text-white text-4xl leading-none">&times;</button>
             </div>
 
-            <img x-show="selectedOrder?.img" :src="selectedOrder?.img" class="w-full h-56 object-cover rounded-[32px] mb-8 shadow-2xl">
+            <img x-show="selectedOrder?.img" :src="selectedOrder?.img" class="w-full h-56 object-cover rounded-[32px] mb-8 shadow-2xl border border-white/5">
 
             <div class="space-y-6">
                 <div x-show="selectedOrder?.ownerId === myId" class="border border-blue-600/30 bg-blue-600/5 p-8 rounded-[32px]">
-                    <p class="text-[10px] text-blue-400 uppercase font-black mb-4">Management</p>
-                    <button @click="cancelListing" class="w-full border border-red-500/50 text-red-500 py-4 rounded-2xl font-black text-[10px] uppercase hover:bg-red-500 hover:text-white mb-4">Delete Listing</button>
+                    <p class="text-[10px] text-blue-400 uppercase font-black mb-4">Owner Panel</p>
+                    <button @click="cancelListing" class="w-full border border-red-500/50 text-red-500 py-4 rounded-2xl font-black text-[10px] uppercase hover:bg-red-500 hover:text-white transition-all mb-4">Cancel Post</button>
                     <div class="flex gap-2">
                         <input type="number" x-model="counterAmount" placeholder="New Price" class="bg-black border border-white/10 p-4 rounded-xl flex-1 outline-none text-sm font-mono text-white">
                         <button @click="sendCounter" class="bg-blue-600 text-white px-8 rounded-xl font-black text-[10px] uppercase">Update</button>
@@ -145,16 +121,16 @@
                 </div>
 
                 <div x-show="selectedOrder?.ownerId !== myId" class="bg-white/5 p-8 rounded-[32px] border border-white/5">
-                    <p class="text-[10px] text-slate-500 uppercase font-black mb-4">Negotiate</p>
+                    <p class="text-[10px] text-slate-500 uppercase font-black mb-4">Offer</p>
                     <div class="flex gap-3">
-                        <input type="number" x-model="bidAmount" placeholder="Your Bid" class="bg-black border border-white/10 p-4 rounded-xl flex-1 outline-none text-sm font-mono text-white">
-                        <button @click="placeBid" class="bg-white text-black px-8 rounded-xl font-black text-[10px] uppercase">Bid</button>
+                        <input type="number" x-model="bidAmount" placeholder="Bid Amount" class="bg-black border border-white/10 p-4 rounded-xl flex-1 outline-none text-sm font-mono text-white">
+                        <button @click="placeBid" class="bg-white text-black px-8 rounded-xl font-black text-[10px] uppercase hover:bg-blue-600 hover:text-white transition-all">Submit</button>
                     </div>
                 </div>
 
                 <button @click="executeDeal(selectedOrder.currentBid || selectedOrder.price)" 
                     :disabled="isButtonDisabled()"
-                    :class="isButtonDisabled() ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-blue-600 text-white'"
+                    :class="isButtonDisabled() ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-blue-600 text-white shadow-2xl hover:bg-blue-500'"
                     class="w-full py-6 rounded-3xl font-black uppercase text-xs tracking-[0.2em] transition-all">
                     <span x-text="getButtonText()"></span>
                 </button>
@@ -162,7 +138,32 @@
         </div>
     </div>
 
+    <div x-show="showPostModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/98 backdrop-blur-2xl">
+        <div class="bg-[#0f1218] border border-white/10 w-full max-w-xl p-12 rounded-[50px] shadow-2xl" @click.away="showPostModal = false">
+            <h2 class="text-3xl font-black text-white mb-8 uppercase italic tracking-tighter">New Listing</h2>
+            <div class="space-y-5">
+                <div class="grid grid-cols-2 gap-5">
+                    <input type="text" x-model="newItem" placeholder="Item Name" class="bg-black border border-white/10 p-5 rounded-2xl outline-none text-white text-sm">
+                    <input type="number" x-model="newPrice" placeholder="Price ($)" class="bg-black border border-white/10 p-5 rounded-2xl outline-none text-white text-sm font-mono">
+                </div>
+                <textarea x-model="newDesc" placeholder="Description..." class="w-full bg-black border border-white/10 p-5 rounded-2xl h-32 outline-none text-white text-sm focus:border-blue-600"></textarea>
+                <div class="bg-blue-600/5 border border-blue-600/20 p-5 rounded-2xl">
+                    <p class="text-[10px] text-blue-400 font-black mb-2 uppercase tracking-widest">Image URL (Direct Link)</p>
+                    <input type="text" x-model="newImgUrl" placeholder="https://..." class="bg-black border border-white/10 p-4 rounded-xl w-full outline-none text-white text-xs font-mono">
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <select x-model="newType" class="bg-black border border-white/10 p-5 rounded-2xl outline-none text-[10px] font-bold text-slate-400 uppercase">
+                        <option value="SELL">I am Selling</option>
+                        <option value="BUY">I am Buying</option>
+                    </select>
+                    <button @click="addOrder" class="flex-1 bg-blue-600 text-white py-5 rounded-2xl font-black text-[10px] uppercase shadow-xl hover:bg-blue-500 transition-all">Launch</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // FIREBASE SETUP
         const firebaseConfig = {
             apiKey: "AIzaSyDKCh3sZW596W6vWEdSz_Ecbii0rWJVB-o",
             databaseURL: "https://liquidmarkethub-default-rtdb.firebaseio.com",
@@ -176,6 +177,7 @@
                 view: 'market', sidebarOpen: true, orders: [], selectedOrder: null, showPostModal: false,
                 newItem: '', newPrice: '', newDesc: '', newType: 'SELL', newImgUrl: '',
                 bidAmount: '', counterAmount: '', chatRooms: [], activeChat: null, activeChatMessages: [], chatInput: '',
+                // Hardened ID Persistence
                 myId: localStorage.getItem('lmh_user_id') || (function(){
                     const id = 'U-'+Math.floor(1000+Math.random()*9000);
                     localStorage.setItem('lmh_user_id', id); return id;
@@ -193,7 +195,10 @@
                         if(!room) return;
                         db.ref('messages/' + room.id).on('value', s => {
                             const d = s.val(); this.activeChatMessages = d ? Object.values(d) : [];
-                            this.$nextTick(() => { const box = document.getElementById('chat-box'); if(box) box.scrollTop = box.scrollHeight; });
+                            this.$nextTick(() => { 
+                                const box = document.getElementById('chat-box'); 
+                                if(box) box.scrollTop = box.scrollHeight; 
+                            });
                         });
                     });
                 },
@@ -206,8 +211,8 @@
 
                 getButtonText() {
                     if (!this.selectedOrder) return '';
-                    if (this.selectedOrder.ownerId === this.myId) return this.selectedOrder.currentBid ? 'Accept Bid' : 'No Active Bids';
-                    return this.selectedOrder.type === 'SELL' ? 'Finalize Buy' : 'Finalize Sale';
+                    if (this.selectedOrder.ownerId === this.myId) return this.selectedOrder.currentBid ? 'Confirm Bid' : 'No Active Bids';
+                    return this.selectedOrder.type === 'SELL' ? 'Complete Buy' : 'Complete Sale';
                 },
 
                 addOrder() {
@@ -223,13 +228,13 @@
                 placeBid() {
                     if(!this.bidAmount) return;
                     db.ref('listings/' + this.selectedOrder.id).update({ currentBid: parseFloat(this.bidAmount) });
-                    this.bidAmount = ''; alert("Offer Sent.");
+                    this.bidAmount = ''; alert("Offer Recorded.");
                 },
 
                 sendCounter() {
                     if(!this.counterAmount) return;
                     db.ref('listings/' + this.selectedOrder.id).update({ price: parseFloat(this.counterAmount), currentBid: null });
-                    this.counterAmount = ''; alert("Updated.");
+                    this.counterAmount = ''; alert("Price Updated.");
                 },
 
                 cancelListing() {
@@ -242,14 +247,14 @@
 
                 executeDeal(f) {
                     const targetId = this.selectedOrder.id;
-                    // SYNC LOCK: Wait for database deletion before showing success
+                    // HARD DELETE: Wait for server response before closing
                     db.ref('listings/' + targetId).remove()
                     .then(() => {
-                        alert(`TRADE SUCCESSFUL\nPrice: $${f}\nFee: $${(f*0.0099).toFixed(2)}`);
-                        this.selectedOrder = null;
+                        alert(`TRADE FINALIZED\nPrice: $${f}\nFee: $${(f*0.0099).toFixed(2)}\n\nPage will refresh to clear cache.`);
+                        location.reload(); // Force browser refresh to clear ghost listings
                     })
                     .catch(err => {
-                        alert("Sync Error. Listing remains active.");
+                        alert("Network Error: Listing sync failed.");
                     });
                 },
 
