@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LiquidMarketHub | v2.0 Clean</title>
+    <title>LiquidMarketHub | v3.0 Restored</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
@@ -39,7 +39,7 @@
                             <h2 class="text-5xl font-black text-white italic tracking-tighter uppercase">Market Depth</h2>
                             <div :class="connected ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-red-500'" class="w-3 h-3 rounded-full mt-2 transition-all duration-500"></div>
                         </div>
-                        <p class="text-blue-500 text-[10px] font-mono mt-1 font-bold" x-text="'ID: ' + myId"></p>
+                        <p class="text-blue-500 text-[10px] font-mono mt-1 font-bold" x-text="'USER_ID: ' + myId"></p>
                     </div>
                     <button @click="showPostModal = true" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase shadow-2xl hover:scale-105 transition-all">New Listing +</button>
                 </header>
@@ -58,7 +58,8 @@
                                     <h3 class="text-white font-black text-xl uppercase tracking-tighter" x-text="order.item"></h3>
                                     <span class="text-2xl font-black font-mono text-blue-500" x-text="'$' + order.price"></span>
                                 </div>
-                                <div class="flex gap-3 mt-4">
+                                <p class="text-green-400 text-[10px] font-bold mb-4 uppercase tracking-widest" x-show="order.currentBid" x-text="'Current Bid: $' + order.currentBid"></p>
+                                <div class="flex gap-3">
                                     <button @click="selectedOrder = order" class="flex-1 bg-white text-black py-4 rounded-2xl font-black text-[10px] uppercase hover:bg-blue-600 hover:text-white transition-all">Trade Hub</button>
                                     <button @click="openChat(order)" class="px-6 bg-white/5 border border-white/10 text-white py-4 rounded-2xl hover:bg-blue-600 transition-all">💬</button>
                                 </div>
@@ -75,12 +76,13 @@
                 <div class="flex-1 bg-[#0f1218] rounded-[40px] border border-white/5 flex flex-col md:flex-row overflow-hidden shadow-2xl">
                     <div class="w-full md:w-80 border-r border-white/5 p-6 overflow-y-auto bg-black/20">
                         <template x-for="chat in chatRooms" :key="chat.id">
-                            <div @click="activeChat = chat" :class="activeChat?.id === chat.id ? 'bg-blue-600 text-white' : 'hover:bg-white/5 text-slate-400'" class="p-5 rounded-[24px] cursor-pointer mb-3 transition-all">
+                            <div @click="activeChat = chat" :class="activeChat?.id === chat.id ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-white/5 text-slate-400'" class="p-5 rounded-[24px] cursor-pointer mb-3 transition-all">
                                 <p class="text-[11px] font-black uppercase tracking-widest" x-text="chat.item"></p>
+                                <p class="text-[9px] opacity-60 mt-1">Chat Open</p>
                             </div>
                         </template>
                     </div>
-                    <div class="flex-1 flex flex-col bg-black/10 relative">
+                    <div class="flex-1 flex flex-col bg-black/10">
                         <template x-if="activeChat">
                             <div class="flex flex-col h-full p-8">
                                 <div class="flex-1 overflow-y-auto space-y-4 mb-6 pr-4" id="chat-box">
@@ -91,8 +93,8 @@
                                     </template>
                                 </div>
                                 <div class="flex gap-3">
-                                    <input type="text" x-model="chatInput" @keyup.enter="sendChatMsg" placeholder="Type message..." class="bg-black border border-white/10 p-5 rounded-2xl flex-1 outline-none text-sm text-white focus:border-blue-600">
-                                    <button @click="sendChatMsg" class="bg-blue-600 text-white px-10 rounded-2xl font-black uppercase text-[10px]">Send</button>
+                                    <input type="text" x-model="chatInput" @keyup.enter="sendChatMsg" placeholder="Send message..." class="bg-black/50 border border-white/10 p-5 rounded-2xl flex-1 outline-none text-sm text-white focus:border-blue-600 transition-all">
+                                    <button @click="sendChatMsg" class="bg-blue-600 text-white px-10 rounded-2xl font-black uppercase text-[10px] tracking-widest">Send</button>
                                 </div>
                             </div>
                         </template>
@@ -103,34 +105,54 @@
     </main>
 
     <div x-show="selectedOrder" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 backdrop-blur-md">
-        <div class="bg-[#0f1218] border border-white/10 w-full max-w-lg p-12 rounded-[50px] shadow-2xl" @click.away="selectedOrder = null">
-            <h2 class="text-2xl font-black text-white uppercase italic tracking-widest mb-8 text-center" x-text="selectedOrder?.item"></h2>
+        <div class="bg-[#0f1218] border border-white/10 w-full max-w-lg p-10 rounded-[50px] shadow-2xl" @click.away="selectedOrder = null">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black text-white uppercase italic tracking-widest" x-text="selectedOrder?.item"></h2>
+                <button @click="selectedOrder = null" class="text-slate-500 hover:text-white text-4xl">&times;</button>
+            </div>
+
+            <p class="text-slate-400 text-sm mb-8 leading-relaxed italic" x-text="selectedOrder?.desc || 'No description provided.'"></p>
+
             <div class="space-y-6">
-                <template x-if="selectedOrder?.ownerId === myId">
-                    <button @click="cancelListing" class="w-full bg-red-600 text-white py-6 rounded-3xl font-black uppercase text-xs hover:bg-red-500 transition-all">Delete My Listing</button>
-                </template>
-                <template x-if="selectedOrder?.ownerId !== myId">
-                    <button @click="executeDeal(selectedOrder.price)" class="w-full py-6 rounded-3xl font-black uppercase text-xs bg-blue-600 text-white shadow-2xl hover:bg-blue-500 transition-all">Finalize Buy</button>
-                </template>
+                <div x-show="selectedOrder?.ownerId === myId" class="border border-blue-600/30 bg-blue-600/5 p-8 rounded-[32px]">
+                    <p class="text-[10px] text-blue-400 uppercase font-black mb-4">Owner Panel</p>
+                    <div class="flex gap-2 mb-4">
+                        <input type="number" x-model="counterAmount" placeholder="New Price" class="bg-black border border-white/10 p-4 rounded-xl flex-1 outline-none text-sm font-mono text-white">
+                        <button @click="sendCounter" class="bg-blue-600 text-white px-6 rounded-xl font-black text-[10px] uppercase">Update</button>
+                    </div>
+                    <button @click="cancelListing" class="w-full border border-red-500/50 text-red-500 py-4 rounded-2xl font-black text-[10px] uppercase hover:bg-red-500 hover:text-white transition-all">Delete Post</button>
+                </div>
+
+                <div x-show="selectedOrder?.ownerId !== myId" class="bg-white/5 p-8 rounded-[32px] border border-white/5">
+                    <p class="text-[10px] text-slate-500 uppercase font-black mb-4">Make an Offer</p>
+                    <div class="flex gap-3 mb-6">
+                        <input type="number" x-model="bidAmount" placeholder="Bid Amount" class="bg-black border border-white/10 p-4 rounded-xl flex-1 outline-none text-sm font-mono text-white">
+                        <button @click="placeBid" class="bg-white text-black px-8 rounded-xl font-black text-[10px] uppercase hover:bg-blue-600 hover:text-white transition-all">Submit</button>
+                    </div>
+                    <button @click="executeDeal(selectedOrder.price)" class="w-full py-6 rounded-3xl font-black uppercase text-xs bg-blue-600 text-white shadow-2xl hover:bg-blue-500 transition-all">
+                        Buy Now for $<span x-text="selectedOrder?.price"></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <div x-show="showPostModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/98 backdrop-blur-2xl">
         <div class="bg-[#0f1218] border border-white/10 w-full max-w-xl p-12 rounded-[50px] shadow-2xl" @click.away="showPostModal = false">
-            <h2 class="text-3xl font-black text-white mb-8 uppercase italic tracking-tighter">Create Listing</h2>
+            <h2 class="text-3xl font-black text-white mb-8 uppercase italic tracking-tighter">New Listing</h2>
             <div class="space-y-5">
                 <div class="grid grid-cols-2 gap-5">
-                    <input type="text" x-model="newItem" placeholder="Item Name" class="bg-black border border-white/10 p-5 rounded-2xl text-white outline-none focus:border-blue-600">
-                    <input type="number" x-model="newPrice" placeholder="Price ($)" class="bg-black border border-white/10 p-5 rounded-2xl text-white outline-none focus:border-blue-600">
+                    <input type="text" x-model="newItem" placeholder="Item Name" class="bg-black border border-white/10 p-5 rounded-2xl outline-none text-white text-sm">
+                    <input type="number" x-model="newPrice" placeholder="Price ($)" class="bg-black border border-white/10 p-5 rounded-2xl outline-none text-white text-sm font-mono">
                 </div>
-                <input type="text" x-model="newImgUrl" placeholder="Image URL (Link)" class="w-full bg-black border border-white/10 p-5 rounded-2xl text-white outline-none focus:border-blue-600">
-                <div class="flex gap-4">
-                    <select x-model="newType" class="bg-black border border-white/10 p-5 rounded-2xl text-[10px] font-black text-slate-400">
-                        <option value="SELL">SELLING</option>
-                        <option value="BUY">BUYING</option>
+                <textarea x-model="newDesc" placeholder="Describe the item..." class="w-full bg-black border border-white/10 p-5 rounded-2xl h-32 outline-none text-white text-sm focus:border-blue-600"></textarea>
+                <input type="text" x-model="newImgUrl" placeholder="Image URL" class="w-full bg-black border border-white/10 p-5 rounded-2xl outline-none text-white text-xs font-mono">
+                <div class="flex gap-4 pt-4">
+                    <select x-model="newType" class="bg-black border border-white/10 p-5 rounded-2xl outline-none text-[10px] font-bold text-slate-400 uppercase">
+                        <option value="SELL">I am Selling</option>
+                        <option value="BUY">I am Buying</option>
                     </select>
-                    <button @click="addOrder" class="flex-1 bg-blue-600 text-white py-5 rounded-2xl font-black text-[10px] uppercase hover:bg-blue-500 transition-all">Launch</button>
+                    <button @click="addOrder" class="flex-1 bg-blue-600 text-white py-5 rounded-2xl font-black text-[10px] uppercase shadow-xl hover:bg-blue-500 transition-all">Launch</button>
                 </div>
             </div>
         </div>
@@ -147,31 +169,30 @@
 
         function marketApp() {
             return {
-                view: 'market', sidebarOpen: true, orders: [], selectedOrder: null, showPostModal: false,
-                newItem: '', newPrice: '', newImgUrl: '', newType: 'SELL', connected: false,
-                myId: localStorage.getItem('lmh_user_id') || 'U-'+Math.floor(Math.random()*9999),
-                chatRooms: [], activeChat: null, activeChatMessages: [], chatInput: '',
+                view: 'market', sidebarOpen: true, orders: [], selectedOrder: null, showPostModal: false, connected: false,
+                newItem: '', newPrice: '', newDesc: '', newType: 'SELL', newImgUrl: '',
+                bidAmount: '', counterAmount: '', chatRooms: [], activeChat: null, activeChatMessages: [], chatInput: '',
+                myId: localStorage.getItem('lmh_user_id') || (function(){
+                    const id = 'U-'+Math.floor(1000+Math.random()*9000);
+                    localStorage.setItem('lmh_user_id', id); return id;
+                })(),
 
                 init() {
-                    localStorage.setItem('lmh_user_id', this.myId);
-                    
-                    // Connection Status Listener
                     db.ref('.info/connected').on('value', s => { this.connected = s.val(); });
-
                     db.ref('listings').on('value', s => {
                         const d = s.val(); this.orders = d ? Object.values(d).reverse() : [];
                     });
                     db.ref('chats').on('value', s => {
                         const d = s.val() || {};
-                        this.chatRooms = Object.values(d).filter(r => r.buyerId === this.myId || r.sellerId === this.myId);
+                        this.chatRooms = Object.values(d).filter(room => room.buyerId === this.myId || room.sellerId === this.myId);
                     });
                     this.$watch('activeChat', (room) => {
                         if(!room) return;
                         db.ref('messages/' + room.id).on('value', s => {
                             this.activeChatMessages = s.val() ? Object.values(s.val()) : [];
                             this.$nextTick(() => { 
-                                const box = document.getElementById('chat-box');
-                                if(box) box.scrollTop = box.scrollHeight;
+                                const box = document.getElementById('chat-box'); 
+                                if(box) box.scrollTop = box.scrollHeight; 
                             });
                         });
                     });
@@ -182,28 +203,38 @@
                     const id = Date.now();
                     db.ref('listings/' + id).set({
                         id, item: this.newItem.toUpperCase(), price: parseFloat(this.newPrice),
-                        type: this.newType, ownerId: this.myId, img: this.newImgUrl
+                        type: this.newType, ownerId: this.myId, desc: this.newDesc, img: this.newImgUrl
                     });
-                    this.showPostModal = false;
-                    this.newItem = ''; this.newPrice = ''; this.newImgUrl = '';
+                    this.newItem = ''; this.newPrice = ''; this.newDesc = ''; this.newImgUrl = ''; this.showPostModal = false;
+                },
+
+                placeBid() {
+                    if(!this.bidAmount) return;
+                    db.ref('listings/' + this.selectedOrder.id).update({ currentBid: parseFloat(this.bidAmount) });
+                    this.bidAmount = ''; alert("Offer Sent.");
+                },
+
+                sendCounter() {
+                    if(!this.counterAmount) return;
+                    db.ref('listings/' + this.selectedOrder.id).update({ price: parseFloat(this.counterAmount), currentBid: null });
+                    this.counterAmount = ''; alert("Price Updated.");
                 },
 
                 cancelListing() {
-                    if(confirm("Permanently delete this?")) {
-                        db.ref('listings/' + this.selectedOrder.id).remove().then(() => {
-                            this.selectedOrder = null;
-                        });
+                    if(confirm("Delete this post?")) {
+                        db.ref('listings/'+this.selectedOrder.id).remove().then(() => { this.selectedOrder = null; });
                     }
                 },
 
                 executeDeal(price) {
                     db.ref('listings/' + this.selectedOrder.id).remove().then(() => {
-                        alert(`TRADE SUCCESSFUL\nPrice: $${price}\nFee: $${(price*0.0099).toFixed(2)}`);
-                        this.selectedOrder = null;
+                        alert(`TRADE SUCCESSFUL\nPage refreshing to sync.`);
+                        location.reload();
                     });
                 },
 
                 openChat(order) {
+                    if(order.ownerId === this.myId) { this.view = 'chats'; return; }
                     const roomId = [this.myId, order.ownerId, order.id].sort().join('_');
                     const roomData = { id: roomId, item: order.item, buyerId: this.myId, sellerId: order.ownerId };
                     db.ref('chats/' + roomId).set(roomData);
