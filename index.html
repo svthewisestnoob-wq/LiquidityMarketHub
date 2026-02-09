@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LiquidityMarketHub | Professional Hub</title>
+    <title>LiquidityMarketHub | Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
@@ -17,41 +17,41 @@
             <button @click="sidebarOpen = !sidebarOpen" class="p-2 text-white">☰</button>
         </div>
         <nav class="mt-10 flex-1 px-4 space-y-4">
-            <button @click="view = 'market'" :class="view === 'market' ? 'bg-blue-600 text-white' : 'text-slate-400'" class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
+            <button @click="view = 'market'" :class="view === 'market' ? 'bg-blue-600 text-white' : 'text-slate-400'" class="w-full flex items-center gap-4 p-4 rounded-2xl">
                 <span>🛒</span> <span x-show="sidebarOpen" class="text-[10px] font-black uppercase ml-2">Market</span>
             </button>
-            <button @click="view = 'chats'" :class="view === 'chats' ? 'bg-blue-600 text-white' : 'text-slate-400'" class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
+            <button @click="view = 'chats'" :class="view === 'chats' ? 'bg-blue-600 text-white' : 'text-slate-400'" class="w-full flex items-center gap-4 p-4 rounded-2xl">
                 <span>💬</span> <span x-show="sidebarOpen" class="text-[10px] font-black uppercase ml-2">Chats</span>
             </button>
         </nav>
     </aside>
 
-    <main class="flex-1 overflow-y-auto p-8 relative">
+    <main class="flex-1 overflow-y-auto p-8">
         <template x-if="view === 'market'">
             <div x-cloak>
                 <header class="mb-10 flex justify-between items-end">
                     <div>
-                        <h2 class="text-5xl font-black text-white italic tracking-tighter uppercase font-serif">LiquidityMarketHub</h2>
-                        <p class="text-blue-500 text-[10px] font-mono font-bold mt-1" x-text="'HUB_ID: ' + myId"></p>
+                        <h2 class="text-5xl font-black text-white italic uppercase">LiquidityMarketHub</h2>
+                        <p class="text-blue-500 text-[10px] font-mono font-bold" x-text="'TERMINAL: ' + myId"></p>
                     </div>
-                    <button @click="showPostModal = true" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase shadow-2xl">Create Listing +</button>
+                    <button @click="showPostModal = true" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase">New Post +</button>
                 </header>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <template x-for="order in sortedOrders" :key="order.id">
-                        <div class="bg-[#0f1218] border border-white/5 rounded-[40px] overflow-hidden flex flex-col shadow-2xl hover:border-blue-500/50 transition-all">
+                        <div class="bg-[#0f1218] border border-white/5 rounded-[40px] overflow-hidden flex flex-col shadow-2xl">
                             <div class="h-48 bg-black/40 relative">
                                 <template x-if="order.img"><img :src="order.img" class="w-full h-full object-cover opacity-70"></template>
                                 <div class="absolute top-4 left-4 px-3 py-1 bg-blue-600 text-white text-[9px] font-black rounded-full" x-text="order.ownerId === myId ? 'OWNER' : order.type"></div>
                             </div>
                             <div class="p-6">
                                 <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-white font-black text-lg uppercase tracking-tight" x-text="order.item"></h3>
+                                    <h3 class="text-white font-black text-lg uppercase" x-text="order.item"></h3>
                                     <span class="text-xl font-mono text-blue-500 font-black" x-text="'$' + order.price"></span>
                                 </div>
                                 <div class="flex gap-2">
                                     <button @click="selectedOrder = order" class="flex-1 bg-white text-black py-3 rounded-xl font-black text-[10px] uppercase hover:bg-blue-600 hover:text-white transition-all">Trade Hub</button>
-                                    <button @click="openChat(order)" class="px-5 bg-white/5 text-white py-3 rounded-xl hover:bg-blue-600 transition-all text-xl">💬</button>
+                                    <button @click="openChat(order)" class="px-5 bg-white/5 text-white py-3 rounded-xl hover:bg-blue-600 transition-all">💬</button>
                                 </div>
                             </div>
                         </div>
@@ -62,16 +62,15 @@
 
         <template x-if="view === 'chats'">
             <div class="h-full flex flex-col" x-cloak>
-                <div class="flex-1 bg-[#0f1218] rounded-[40px] border border-white/5 flex flex-col md:flex-row overflow-hidden shadow-2xl">
+                <div class="flex-1 bg-[#0f1218] rounded-[40px] border border-white/5 flex flex-col md:flex-row overflow-hidden">
                     <div class="w-full md:w-80 border-r border-white/5 p-4 overflow-y-auto bg-black/20">
-                        <p class="text-[9px] font-black text-slate-500 mb-4 uppercase tracking-widest">Recent Activity</p>
                         <template x-for="chat in sortedChats" :key="chat.id">
                             <div @click="activeChat = chat" :class="activeChat?.id === chat.id ? 'bg-blue-600 text-white' : 'hover:bg-white/5 text-slate-400'" class="p-4 rounded-2xl cursor-pointer mb-2 transition-all">
                                 <div class="flex justify-between items-center">
                                     <p class="text-[11px] font-black uppercase" x-text="chat.item"></p>
-                                    <div class="w-2 h-2 rounded-full bg-blue-300 animate-pulse" x-show="chat.lastSender !== myId"></div>
+                                    <div class="w-2 h-2 rounded-full bg-blue-400" x-show="chat.lastSender !== myId"></div>
                                 </div>
-                                <p class="text-[9px] opacity-60 mt-1" x-text="chat.buyerId === myId ? 'You are Buyer' : 'You are Seller'"></p>
+                                <p class="text-[9px] opacity-60 mt-1" x-text="chat.sellerId === myId ? 'Incoming Lead' : 'Your Offer'"></p>
                             </div>
                         </template>
                     </div>
@@ -80,13 +79,13 @@
                             <div class="flex flex-col h-full p-6">
                                 <div class="flex-1 overflow-y-auto space-y-4 mb-4 pr-2" id="chat-box">
                                     <template x-for="msg in activeChatMessages" :key="msg.id">
-                                        <div :class="msg.sender === myId ? 'ml-auto bg-blue-600 text-white' : 'mr-auto bg-white/5 text-slate-300'" class="max-w-[80%] p-4 rounded-2xl shadow-lg border border-white/5">
+                                        <div :class="msg.sender === myId ? 'ml-auto bg-blue-600 text-white' : 'mr-auto bg-white/5 text-slate-300'" class="max-w-[80%] p-4 rounded-2xl">
                                             <p class="text-sm font-medium" x-text="msg.text"></p>
                                         </div>
                                     </template>
                                 </div>
-                                <div class="flex gap-2 bg-black/30 p-2 rounded-2xl border border-white/10">
-                                    <input type="text" x-model="chatInput" @keyup.enter="sendChatMsg" placeholder="Type a message..." class="bg-transparent p-4 flex-1 outline-none text-white text-sm">
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="chatInput" @keyup.enter="sendChatMsg" placeholder="Message..." class="bg-black border border-white/10 p-4 rounded-xl flex-1 outline-none text-white">
                                     <button @click="sendChatMsg" class="bg-blue-600 text-white px-8 rounded-xl font-black uppercase text-[10px]">Send</button>
                                 </div>
                             </div>
@@ -100,32 +99,31 @@
     <div x-show="selectedOrder" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm">
         <div class="bg-[#0f1218] border border-white/10 w-full max-w-md p-8 rounded-[40px]" @click.away="selectedOrder = null">
             <h2 class="text-2xl font-black text-white uppercase italic mb-2" x-text="selectedOrder?.item"></h2>
-            <p class="text-slate-400 text-sm mb-6 border-l-4 border-blue-600 pl-3 leading-relaxed" x-text="selectedOrder?.desc || 'No description provided.'"></p>
+            <p class="text-slate-400 text-sm mb-6 border-l-2 border-blue-600 pl-3" x-text="selectedOrder?.desc || 'No description'"></p>
             
-            <div x-show="selectedOrder?.ownerId === myId" class="bg-blue-600/5 p-6 rounded-3xl border border-blue-600/20">
-                <p class="text-[10px] font-black text-blue-400 mb-2 uppercase">Price Management</p>
-                <input type="number" x-model="counterAmount" placeholder="New Price" class="w-full bg-black border border-white/10 p-4 rounded-xl text-white mb-2 text-sm">
+            <div x-show="selectedOrder?.ownerId === myId" class="bg-blue-600/10 p-6 rounded-2xl border border-blue-600/20">
+                <input type="number" x-model="counterAmount" placeholder="New Price" class="w-full bg-black border border-white/10 p-4 rounded-xl text-white mb-2">
                 <button @click="sendCounter" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black text-[10px] uppercase">Update Price</button>
             </div>
 
             <div x-show="selectedOrder?.ownerId !== myId" class="space-y-4">
-                <button @click="executeDeal(selectedOrder.price)" class="w-full bg-blue-600 text-white py-5 rounded-[25px] font-black uppercase text-xs shadow-2xl">Buy Now for $<span x-text="selectedOrder?.price"></span></button>
+                <button @click="executeDeal(selectedOrder.price)" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase text-xs">Buy for $<span x-text="selectedOrder?.price"></span></button>
             </div>
         </div>
     </div>
 
-    <div x-show="showPostModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/98 backdrop-blur-xl">
+    <div x-show="showPostModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95">
         <div class="bg-[#0f1218] border border-white/10 w-full max-w-lg p-10 rounded-[40px]">
-            <h2 class="text-2xl font-black text-white mb-6 uppercase italic">Market Entry</h2>
+            <h2 class="text-2xl font-black text-white mb-6 uppercase">Create Listing</h2>
             <div class="space-y-4">
-                <input type="text" x-model="newItem" placeholder="Item Name" class="w-full bg-black border border-white/10 p-4 rounded-xl text-white text-sm">
-                <input type="number" x-model="newPrice" placeholder="Price ($)" class="w-full bg-black border border-white/10 p-4 rounded-xl text-white text-sm">
-                <textarea x-model="newDesc" placeholder="Describe the asset..." class="w-full bg-black border border-white/10 p-4 rounded-xl text-white h-24 text-sm"></textarea>
+                <input type="text" x-model="newItem" placeholder="Item Name" class="w-full bg-black border border-white/10 p-4 rounded-xl text-white">
+                <input type="number" x-model="newPrice" placeholder="Price" class="w-full bg-black border border-white/10 p-4 rounded-xl text-white">
+                <textarea x-model="newDesc" placeholder="Description..." class="w-full bg-black border border-white/10 p-4 rounded-xl text-white h-24"></textarea>
                 <div class="flex gap-2">
-                    <select x-model="newType" class="bg-black border border-white/10 p-4 rounded-xl text-[10px] font-black text-slate-400 uppercase">
-                        <option value="SELL">SELLING</option><option value="BUY">BUYING</option>
+                    <select x-model="newType" class="bg-black border border-white/10 p-4 rounded-xl text-xs font-black text-slate-400">
+                        <option value="SELL">SELL</option><option value="BUY">BUY</option>
                     </select>
-                    <button @click="addOrder" class="flex-1 bg-blue-600 text-white py-4 rounded-xl font-black text-[10px] uppercase">Post Globally</button>
+                    <button @click="addOrder" class="flex-1 bg-blue-600 text-white py-4 rounded-xl font-black text-[10px] uppercase">Launch</button>
                 </div>
             </div>
         </div>
@@ -145,7 +143,8 @@
                 view: 'market', sidebarOpen: true, orders: [], chatRooms: [], 
                 activeChat: null, activeChatMessages: [], chatInput: '',
                 selectedOrder: null, showPostModal: false,
-                newItem: '', newPrice: '', newDesc: '', newType: 'SELL', counterAmount: '',
+                newItem: '', newPrice: '', newDesc: '', newType: 'SELL',
+                counterAmount: '',
                 myId: localStorage.getItem('lmh_user_id') || (function(){
                     const id = 'U-'+Math.floor(Math.random()*9000+1000);
                     localStorage.setItem('lmh_user_id', id); return id;
@@ -178,13 +177,12 @@
 
                 sendCounter() {
                     db.ref('listings/' + this.selectedOrder.id).update({ price: parseFloat(this.counterAmount) });
-                    this.counterAmount = ''; alert("Price Synced.");
+                    this.counterAmount = ''; alert("Updated.");
                 },
 
                 executeDeal(price) {
-                    const fee = (price * 0.0099);
-                    const total = (price + fee).toFixed(2);
-                    if(confirm(`Buyer Premium (0.99%): $${fee.toFixed(2)}\nTotal Amount: $${total}\n\nFinalize Trade?`)) {
+                    const total = (price * 1.0099).toFixed(2);
+                    if(confirm(`Total with 0.99% Fee: $${total}\nExecute?`)) {
                         db.ref('listings/' + this.selectedOrder.id).remove();
                         this.selectedOrder = null;
                     }
@@ -192,36 +190,17 @@
 
                 openChat(order) {
                     const roomId = [this.myId, order.ownerId, order.id].sort().join('_');
-                    const roomRef = db.ref('chats/' + roomId);
-                    
-                    roomRef.once('value', s => {
-                        if (!s.exists()) {
-                            roomRef.set({ id: roomId, item: order.item, buyerId: this.myId, sellerId: order.ownerId, lastUpdate: Date.now() });
-                        }
-                    });
-
-                    this.activeChat = { id: roomId, item: order.item, buyerId: this.myId, sellerId: order.ownerId };
-                    this.view = 'chats';
+                    const roomData = { id: roomId, item: order.item, buyerId: this.myId, sellerId: order.ownerId, lastUpdate: Date.now() };
+                    db.ref('chats/' + roomId).update(roomData);
+                    this.activeChat = roomData; this.view = 'chats';
                 },
 
                 sendChatMsg() {
                     if(!this.chatInput || !this.activeChat) return;
-                    const msgText = this.chatInput;
-                    const timestamp = Date.now();
-                    this.chatInput = ''; // Clear instantly for responsiveness
-
-                    // Post Message
-                    db.ref('messages/' + this.activeChat.id).push({
-                        sender: this.myId,
-                        text: msgText,
-                        time: timestamp
-                    }).then(() => {
-                        // Update Chat Room Metadata to force Priority Sorting
-                        db.ref('chats/' + this.activeChat.id).update({
-                            lastUpdate: timestamp,
-                            lastSender: this.myId
-                        });
-                    });
+                    const txt = this.chatInput; this.chatInput = '';
+                    const time = Date.now();
+                    db.ref('messages/' + this.activeChat.id).push({ sender: this.myId, text: txt, time: time });
+                    db.ref('chats/' + this.activeChat.id).update({ lastUpdate: time, lastSender: this.myId });
                 }
             }
         }
