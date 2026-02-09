@@ -2,82 +2,156 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LiquidMarketHub | Safety First</title>
+    <title>LiquidMarketHub | Market + Trade + Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-database-compat.js"></script>
     <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body class="bg-[#05070a] text-slate-300 font-sans p-6" x-data="marketApp()">
+<body class="bg-[#05070a] text-slate-300 font-sans h-screen flex overflow-hidden" x-data="marketApp()">
 
-    <div class="max-w-4xl mx-auto">
-        <header class="flex justify-between items-center mb-10 border-b border-white/5 pb-6">
-            <h1 class="text-2xl font-black text-white italic tracking-tighter uppercase">LiquidMarketHub</h1>
-            <p class="text-[8px] text-slate-600 font-mono" x-text="'USER_ID: ' + myId"></p>
-        </header>
-
-        <div class="bg-[#0f1218] p-6 rounded-3xl border border-white/5 mb-10">
-            <div class="flex flex-col md:flex-row gap-3">
-                <input type="text" x-model="newItem" placeholder="Item Name" class="bg-black/40 border border-white/10 p-4 rounded-xl flex-1 outline-none text-sm">
-                <input type="number" x-model="newPrice" placeholder="Price ($)" class="bg-black/40 border border-white/10 p-4 rounded-xl w-32 outline-none text-sm font-mono">
-                <select x-model="newType" class="bg-black/40 border border-white/10 p-4 rounded-xl outline-none text-[10px] font-bold text-slate-400">
-                    <option value="SELL">SELLING</option>
-                    <option value="BUY">BUYING</option>
-                </select>
-                <button @click="addOrder" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase">Post Listing</button>
-            </div>
+    <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="bg-[#0f1218] border-r border-white/5 flex flex-col transition-all duration-300">
+        <div class="p-6 flex items-center justify-between">
+            <h1 x-show="sidebarOpen" class="text-white font-black italic text-sm tracking-tighter">LIQUID HUB</h1>
+            <button @click="sidebarOpen = !sidebarOpen" class="p-2 hover:bg-white/5 rounded-lg text-white">☰</button>
         </div>
+        <nav class="mt-10 flex-1 px-4 space-y-4">
+            <button @click="view = 'market'" :class="view === 'market' ? 'bg-blue-600 text-white' : 'text-slate-400'" class="w-full flex items-center gap-4 p-3 rounded-xl transition-all">
+                <span>🛒</span> <span x-show="sidebarOpen" class="text-xs font-bold uppercase tracking-widest">Market</span>
+            </button>
+            <button @click="view = 'chats'" :class="view === 'chats' ? 'bg-blue-600 text-white' : 'text-slate-400'" class="w-full flex items-center gap-4 p-3 rounded-xl transition-all">
+                <span>💬</span> <span x-show="sidebarOpen" class="text-xs font-bold uppercase tracking-widest">Chats</span>
+            </button>
+        </nav>
+    </aside>
 
-        <div class="space-y-4">
-            <template x-for="order in orders" :key="order.id">
-                <div @click="selectedOrder = order" class="bg-[#0f1218] border border-white/5 p-6 rounded-2xl flex justify-between items-center cursor-pointer hover:border-blue-500/50">
-                    <div class="flex items-center gap-6">
-                        <div :class="order.ownerId === myId ? 'text-white border-white/20' : (order.type === 'SELL' ? 'text-blue-400 border-blue-400/20' : 'text-orange-400 border-orange-400/20')" 
-                             class="w-40 py-2 rounded-lg text-center border font-black text-[10px] uppercase bg-white/5">
-                            <span x-text="order.ownerId === myId ? order.type + ' (YOU)' : (order.type === 'SELL' ? 'BUY' : 'SELL')"></span>
-                        </div>
-                        <h3 class="text-lg font-bold text-white" x-text="order.item"></h3>
+    <main class="flex-1 overflow-y-auto p-8">
+        <template x-if="view === 'market'">
+            <div>
+                <header class="mb-10 flex justify-between items-end">
+                    <div>
+                        <h2 class="text-4xl font-black text-white italic">Market Depth</h2>
+                        <p class="text-slate-500 text-[10px] font-mono mt-1 uppercase" x-text="'USER_ID: ' + myId"></p>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xl font-mono font-black text-white" x-text="'$' + order.price"></p>
-                        <p class="text-[10px] text-green-400 font-bold" x-show="order.currentBid" x-text="'Highest Bid: $' + order.currentBid"></p>
+                    <button @click="showPostModal = true" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg hover:scale-105 transition-all">Post Listing +</button>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <template x-for="order in orders" :key="order.id">
+                        <div class="bg-[#0f1218] border border-white/5 rounded-[32px] overflow-hidden hover:border-blue-500/40 transition-all flex flex-col shadow-2xl">
+                            <div class="h-48 bg-black/40 relative">
+                                <template x-if="order.img">
+                                    <img :src="order.img" class="w-full h-full object-cover opacity-90">
+                                </template>
+                                <div class="absolute top-4 left-4 px-3 py-1 bg-black/80 rounded-full border border-white/10 text-[8px] font-black uppercase text-white" x-text="order.ownerId === myId ? order.type + ' (YOU)' : order.type"></div>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="text-white font-bold text-xl uppercase tracking-tighter" x-text="order.item"></h3>
+                                    <span class="text-xl font-black font-mono text-blue-500" x-text="'$' + order.price"></span>
+                                </div>
+                                <p class="text-green-400 text-[10px] font-bold mb-4 uppercase tracking-widest" x-show="order.currentBid" x-text="'Top Bid: $' + order.currentBid"></p>
+                                <div class="flex gap-2 mt-auto">
+                                    <button @click="selectedOrder = order" class="flex-1 bg-white text-black py-3 rounded-xl font-black text-[10px] uppercase hover:bg-blue-500 hover:text-white transition-all">Trade Hub</button>
+                                    <button @click="openChat(order)" class="px-5 bg-white/5 border border-white/10 text-white py-3 rounded-xl hover:bg-white/10 transition-all">💬</button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <template x-if="view === 'chats'">
+            <div class="h-full flex flex-col">
+                <h2 class="text-2xl font-black text-white mb-6 uppercase italic">Conversations</h2>
+                <div class="flex-1 bg-[#0f1218] rounded-3xl border border-white/5 flex flex-col md:flex-row overflow-hidden">
+                    <div class="w-full md:w-80 border-r border-white/5 p-4 overflow-y-auto bg-black/20">
+                        <template x-for="chat in chatRooms" :key="chat.id">
+                            <div @click="activeChat = chat" :class="activeChat?.id === chat.id ? 'bg-blue-600 text-white' : 'hover:bg-white/5 text-slate-400'" class="p-4 rounded-2xl cursor-pointer mb-2 transition-all">
+                                <p class="text-xs font-black uppercase" x-text="chat.item"></p>
+                                <p class="text-[9px] opacity-60">Message History Available</p>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="flex-1 flex flex-col">
+                        <template x-if="activeChat">
+                            <div class="flex flex-col h-full p-6">
+                                <div class="flex-1 overflow-y-auto space-y-4 mb-4 font-mono text-sm" id="chat-box">
+                                    <template x-for="msg in activeChatMessages" :key="msg.id">
+                                        <div :class="msg.sender === myId ? 'ml-auto bg-blue-600 text-white' : 'mr-auto bg-white/5 text-slate-300'" class="max-w-[70%] p-4 rounded-2xl">
+                                            <p x-text="msg.text"></p>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="chatInput" @keyup.enter="sendChatMsg" placeholder="Send message..." class="bg-black border border-white/10 p-4 rounded-xl flex-1 outline-none text-sm text-white">
+                                    <button @click="sendChatMsg" class="bg-blue-600 text-white px-8 rounded-xl font-black">SEND</button>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </div>
-            </template>
+            </div>
+        </template>
+    </main>
+
+    <div x-show="showPostModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/98 backdrop-blur-2xl">
+        <div class="bg-[#0f1218] border border-white/10 w-full max-w-xl p-10 rounded-[40px]" @click.away="showPostModal = false">
+            <h2 class="text-3xl font-black text-white mb-8 uppercase italic">New Listing</h2>
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" x-model="newItem" placeholder="Item Name" class="bg-black border border-white/10 p-4 rounded-xl outline-none text-white text-sm">
+                    <input type="number" x-model="newPrice" placeholder="Price ($)" class="bg-black border border-white/10 p-4 rounded-xl outline-none text-white text-sm font-mono">
+                </div>
+                <textarea x-model="newDesc" placeholder="Description..." class="w-full bg-black border border-white/10 p-4 rounded-xl h-24 outline-none text-white text-sm"></textarea>
+                <div class="bg-blue-600/5 border border-blue-600/20 p-4 rounded-xl">
+                    <p class="text-[10px] text-blue-400 font-black mb-2 uppercase">Paste Image URL (Free)</p>
+                    <input type="text" x-model="newImgUrl" placeholder="https://..." class="bg-black border border-white/10 p-3 rounded-lg w-full outline-none text-white text-xs">
+                </div>
+                <div class="flex gap-4">
+                    <select x-model="newType" class="bg-black border border-white/10 p-4 rounded-xl outline-none text-[10px] font-bold text-slate-400">
+                        <option value="SELL">SELLING</option>
+                        <option value="BUY">BUYING</option>
+                    </select>
+                    <button @click="addOrder" class="flex-1 bg-blue-600 text-white py-4 rounded-xl font-black text-[10px] uppercase shadow-xl">Launch</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <div x-show="selectedOrder" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/95 backdrop-blur-md">
         <div class="bg-[#0f1218] border border-white/10 w-full max-w-lg p-10 rounded-[40px]" @click.away="selectedOrder = null">
-            
-            <div class="flex justify-between items-start mb-6">
-                <h2 class="text-3xl font-black text-white" x-text="selectedOrder?.item"></h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black text-white uppercase italic" x-text="selectedOrder?.item"></h2>
                 <button @click="selectedOrder = null" class="text-slate-500 hover:text-white text-3xl">&times;</button>
             </div>
 
+            <img x-show="selectedOrder?.img" :src="selectedOrder?.img" class="w-full h-48 object-cover rounded-2xl mb-6 shadow-2xl">
+
             <div class="space-y-6">
-                <div x-show="selectedOrder?.ownerId !== myId" class="bg-white/5 p-6 rounded-3xl">
-                    <p class="text-[10px] text-slate-500 uppercase font-black mb-3">Place a Bid</p>
+                <div x-show="selectedOrder?.ownerId === myId" class="border border-blue-600/30 bg-blue-600/5 p-6 rounded-3xl">
+                    <p class="text-[10px] text-blue-400 uppercase font-black mb-3">Owner Dashboard</p>
+                    <button @click="cancelListing" class="w-full border border-red-500/50 text-red-500 py-3 rounded-xl font-black text-[10px] uppercase hover:bg-red-500 hover:text-white transition-all mb-4">Cancel Listing</button>
                     <div class="flex gap-2">
-                        <input type="number" x-model="bidAmount" placeholder="Amount" class="bg-black border border-white/10 p-3 rounded-xl flex-1 outline-none text-sm font-mono">
-                        <button @click="placeBid" class="bg-white text-black px-6 py-3 rounded-xl font-black text-[10px] uppercase">Send Bid</button>
+                        <input type="number" x-model="counterAmount" placeholder="New Asking Price" class="bg-black border border-white/10 p-3 rounded-xl flex-1 outline-none text-sm font-mono text-white">
+                        <button @click="sendCounter" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase">Update</button>
                     </div>
                 </div>
 
-                <div x-show="selectedOrder?.ownerId === myId" class="border border-white/10 p-6 rounded-3xl bg-blue-500/5">
-                    <p class="text-[10px] text-blue-400 uppercase font-black mb-3">Owner Options</p>
-                    <button @click="cancelListing" class="w-full bg-red-600/20 text-red-500 border border-red-500/50 py-3 rounded-xl font-black text-[10px] uppercase mb-4 hover:bg-red-600 hover:text-white transition-all">Cancel Listing (Free)</button>
+                <div x-show="selectedOrder?.ownerId !== myId" class="bg-white/5 p-6 rounded-3xl">
+                    <p class="text-[10px] text-slate-500 uppercase font-black mb-3">Place a Bid</p>
                     <div class="flex gap-2">
-                        <input type="number" x-model="counterAmount" placeholder="New Price" class="bg-black border border-white/10 p-3 rounded-xl flex-1 outline-none text-sm font-mono">
-                        <button @click="sendCounter" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase">Update</button>
+                        <input type="number" x-model="bidAmount" placeholder="Your Offer" class="bg-black border border-white/10 p-3 rounded-xl flex-1 outline-none text-sm font-mono text-white">
+                        <button @click="placeBid" class="bg-white text-black px-6 py-3 rounded-xl font-black text-[10px] uppercase">Bid</button>
                     </div>
                 </div>
 
                 <button @click="executeDeal(selectedOrder.currentBid || selectedOrder.price)" 
                     :disabled="isButtonDisabled()"
-                    :class="isButtonDisabled() ? 'bg-slate-800 text-slate-600 cursor-not-allowed opacity-50' : 'bg-blue-600 text-white hover:scale-105'"
-                    class="w-full py-5 rounded-2xl font-black uppercase text-xs tracking-widest transition-all shadow-xl">
+                    :class="isButtonDisabled() ? 'bg-slate-800 text-slate-600 cursor-not-allowed opacity-50' : 'bg-blue-600 text-white'"
+                    class="w-full py-5 rounded-2xl font-black uppercase text-xs tracking-widest">
                     <span x-text="getButtonText()"></span>
                 </button>
             </div>
@@ -95,67 +169,77 @@
 
         function marketApp() {
             return {
-                orders: [], newItem: '', newPrice: '', newType: 'SELL', selectedOrder: null, bidAmount: '', counterAmount: '',
-                myId: localStorage.getItem('lmh_user_id') || (function(){
-                    const id = 'U-' + Math.floor(1000 + Math.random() * 9000);
-                    localStorage.setItem('lmh_user_id', id); return id;
-                })(),
+                view: 'market', sidebarOpen: true, orders: [], selectedOrder: null, showPostModal: false,
+                newItem: '', newPrice: '', newDesc: '', newType: 'SELL', newImgUrl: '',
+                bidAmount: '', counterAmount: '', chatRooms: [], activeChat: null, activeChatMessages: [], chatInput: '',
+                myId: localStorage.getItem('lmh_user_id') || 'U-'+Math.floor(1000+Math.random()*9000),
 
                 init() {
                     db.ref('listings').on('value', s => {
                         const d = s.val(); this.orders = d ? Object.values(d).reverse() : [];
                     });
+                    db.ref('chats').on('value', s => {
+                        const d = s.val() || {};
+                        this.chatRooms = Object.values(d).filter(room => room.buyerId === this.myId || room.sellerId === this.myId);
+                    });
+                    this.$watch('activeChat', (room) => {
+                        if(!room) return;
+                        db.ref('messages/' + room.id).on('value', s => {
+                            const d = s.val(); this.activeChatMessages = d ? Object.values(d) : [];
+                        });
+                    });
                 },
 
-                isButtonDisabled() {
-                    if (!this.selectedOrder) return true;
-                    // Disable if it's yours and there's no external bid to accept
-                    return (this.selectedOrder.ownerId === this.myId && !this.selectedOrder.currentBid);
-                },
-
+                isButtonDisabled() { return (this.selectedOrder?.ownerId === this.myId && !this.selectedOrder?.currentBid); },
                 getButtonText() {
-                    if (!this.selectedOrder) return '';
-                    if (this.selectedOrder.ownerId === this.myId) {
-                        return this.selectedOrder.currentBid ? 'Accept Highest Bid' : 'Sellers cannot buy their own item';
-                    }
-                    return this.selectedOrder.type === 'SELL' ? 'Buy Now' : 'Sell Now';
+                    if (this.selectedOrder?.ownerId === this.myId) return this.selectedOrder.currentBid ? 'Accept Highest Bid' : 'Waiting for Bids...';
+                    return this.selectedOrder?.type === 'SELL' ? 'Buy Now' : 'Sell Now';
                 },
 
                 addOrder() {
                     if(!this.newItem || !this.newPrice) return;
-                    const id = Date.now();
-                    db.ref('listings/' + id).set({
-                        id, item: this.newItem.toUpperCase(), price: parseFloat(this.newPrice),
-                        type: this.newType, ownerId: this.myId
+                    db.ref('listings/' + Date.now()).set({
+                        id: Date.now(), item: this.newItem.toUpperCase(), price: parseFloat(this.newPrice),
+                        type: this.newType, ownerId: this.myId, desc: this.newDesc, img: this.newImgUrl
                     });
-                    this.newItem = ''; this.newPrice = '';
-                },
-
-                cancelListing() {
-                    if (confirm("Delete this listing?")) {
-                        db.ref('listings/' + this.selectedOrder.id).remove();
-                        this.selectedOrder = null;
-                    }
+                    this.newItem = ''; this.newPrice = ''; this.newDesc = ''; this.newImgUrl = ''; this.showPostModal = false;
                 },
 
                 placeBid() {
-                    const bid = parseFloat(this.bidAmount);
-                    if (this.selectedOrder.type === 'SELL' && bid >= this.selectedOrder.price) { alert("Just use Buy Now!"); return; }
-                    db.ref('listings/' + this.selectedOrder.id).update({ currentBid: bid });
+                    db.ref('listings/' + this.selectedOrder.id).update({ currentBid: parseFloat(this.bidAmount) });
                     this.bidAmount = ''; alert("Bid Placed!");
                 },
 
                 sendCounter() {
-                    db.ref('listings/' + this.selectedOrder.id).update({
-                        price: parseFloat(this.counterAmount), currentBid: null
-                    });
-                    this.counterAmount = '';
+                    db.ref('listings/' + this.selectedOrder.id).update({ price: parseFloat(this.counterAmount), currentBid: null });
+                    this.counterAmount = ''; alert("Price Updated!");
+                },
+
+                cancelListing() {
+                    if(confirm("Delete Listing?")) { db.ref('listings/'+this.selectedOrder.id).remove(); this.selectedOrder=null; }
                 },
 
                 executeDeal(f) {
-                    alert(`TRADE SUCCESSFUL: $${f}\nMarket Fee: $${(f*0.0099).toFixed(2)}`);
-                    db.ref('listings/' + this.selectedOrder.id).remove();
-                    this.selectedOrder = null;
+                    alert(`Trade Success! Fee: $${(f*0.0099).toFixed(2)}`);
+                    db.ref('listings/'+this.selectedOrder.id).remove();
+                    this.selectedOrder=null;
+                },
+
+                openChat(order) {
+                    if(order.ownerId === this.myId) { this.view = 'chats'; return; }
+                    const roomId = [this.myId, order.ownerId, order.id].sort().join('_');
+                    const roomData = { id: roomId, item: order.item, buyerId: this.myId, sellerId: order.ownerId };
+                    db.ref('chats/' + roomId).set(roomData);
+                    this.activeChat = roomData;
+                    this.view = 'chats';
+                },
+
+                sendChatMsg() {
+                    if(!this.chatInput || !this.activeChat) return;
+                    db.ref('messages/' + this.activeChat.id).push({
+                        sender: this.myId, text: this.chatInput, time: Date.now()
+                    });
+                    this.chatInput = '';
                 }
             }
         }
