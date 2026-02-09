@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LiquidMarketHub | Secure Guardrails</title>
+    <title>LiquidMarketHub | Secure Seller Tools</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
@@ -13,17 +13,17 @@
 
     <div class="max-w-4xl mx-auto">
         <header class="flex justify-between items-center mb-10 border-b border-white/5 pb-6">
-            <h1 class="text-2xl font-black text-white italic tracking-tighter">LIQUIDMARKETHUB</h1>
-            <p class="text-[8px] text-slate-600 font-mono" x-text="'USER_SESSION: ' + myId"></p>
+            <h1 class="text-2xl font-black text-white italic tracking-tighter uppercase">LiquidMarketHub</h1>
+            <p class="text-[8px] text-slate-600 font-mono" x-text="'SESSION: ' + myId"></p>
         </header>
 
         <div class="bg-[#0f1218] p-6 rounded-3xl border border-white/5 mb-10">
             <div class="flex flex-col md:flex-row gap-3">
                 <input type="text" x-model="newItem" placeholder="Item Name" class="bg-black/40 border border-white/10 p-4 rounded-xl flex-1 outline-none text-sm">
                 <input type="number" x-model="newPrice" placeholder="Price ($)" class="bg-black/40 border border-white/10 p-4 rounded-xl w-32 outline-none text-sm font-mono">
-                <select x-model="newType" class="bg-black/40 border border-white/10 p-4 rounded-xl outline-none text-[10px] font-bold text-slate-400 uppercase">
-                    <option value="SELL">I am Selling</option>
-                    <option value="BUY">I am Buying</option>
+                <select x-model="newType" class="bg-black/40 border border-white/10 p-4 rounded-xl outline-none text-[10px] font-bold text-slate-400">
+                    <option value="SELL">SELLING</option>
+                    <option value="BUY">BUYING</option>
                 </select>
                 <button @click="addOrder" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase">Post</button>
             </div>
@@ -33,53 +33,54 @@
             <template x-for="order in orders" :key="order.id">
                 <div @click="selectedOrder = order" class="bg-[#0f1218] border border-white/5 p-6 rounded-2xl flex justify-between items-center cursor-pointer hover:border-blue-500/50">
                     <div class="flex items-center gap-6">
-                        <div :class="order.ownerId === myId ? 'border-white/20 text-white' : (order.type === 'SELL' ? 'text-blue-400 border-blue-400/20' : 'text-orange-400 border-orange-400/20')" 
+                        <div :class="order.ownerId === myId ? 'text-white border-white/20' : (order.type === 'SELL' ? 'text-blue-400 border-blue-400/20' : 'text-orange-400 border-orange-400/20')" 
                              class="w-40 py-2 rounded-lg text-center border font-black text-[10px] uppercase bg-white/5">
                             <span x-text="order.ownerId === myId ? order.type + ' (YOU)' : (order.type === 'SELL' ? 'Available to BUY' : 'Available to SELL')"></span>
                         </div>
                         <h3 class="text-lg font-bold text-white" x-text="order.item"></h3>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xl font-mono font-black text-white" x-text="'$' + order.price"></p>
-                        <template x-if="order.currentBid"><p class="text-[10px] text-green-400 font-bold" x-text="'Top Bid: $' + order.currentBid"></p></template>
+                    <div class="text-right font-mono">
+                        <p class="text-xl font-black text-white" x-text="'$' + order.price"></p>
+                        <p class="text-[10px] text-green-400 font-bold" x-show="order.currentBid" x-text="'Top Bid: $' + order.currentBid"></p>
                     </div>
                 </div>
             </template>
         </div>
     </div>
 
-    <div x-show="selectedOrder" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
-        <div class="bg-[#0f1218] border border-white/10 w-full max-w-md p-10 rounded-[40px]" @click.away="selectedOrder = null">
-            <h2 class="text-4xl font-black text-white mb-6" x-text="selectedOrder?.item"></h2>
+    <div x-show="selectedOrder" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/95 backdrop-blur-md">
+        <div class="bg-[#0f1218] border border-white/10 w-full max-w-lg p-10 rounded-[40px]" @click.away="selectedOrder = null">
+            
+            <div class="flex justify-between items-start mb-6">
+                <h2 class="text-3xl font-black text-white" x-text="selectedOrder?.item"></h2>
+                <button @click="selectedOrder = null" class="text-slate-500 hover:text-white text-3xl">&times;</button>
+            </div>
 
-            <div class="space-y-6 mb-8">
-                <div class="flex justify-between border-b border-white/5 pb-4">
-                    <span class="text-slate-500 text-xs font-bold uppercase">Current Asking Price</span>
-                    <span class="text-2xl font-mono text-white font-black" x-text="'$' + selectedOrder?.price"></span>
-                </div>
-
+            <div class="space-y-6">
                 <div x-show="selectedOrder?.ownerId !== myId" class="bg-white/5 p-6 rounded-3xl">
-                    <p class="text-[10px] text-slate-500 uppercase font-black mb-4 tracking-widest">Submit Negotiation</p>
+                    <p class="text-[10px] text-slate-500 uppercase font-black mb-3">Place a Bid</p>
                     <div class="flex gap-2">
-                        <input type="number" x-model="bidAmount" placeholder="Bid Amount" class="bg-black border border-white/10 p-3 rounded-xl flex-1 outline-none text-sm font-mono">
+                        <input type="number" x-model="bidAmount" placeholder="Amount" class="bg-black border border-white/10 p-3 rounded-xl flex-1 outline-none text-sm font-mono">
                         <button @click="placeBid" class="bg-white text-black px-6 py-3 rounded-xl font-black text-[10px] uppercase">Bid</button>
                     </div>
-                    <p class="text-[9px] text-orange-500/80 mt-2 italic" x-text="getGuardrailText()"></p>
                 </div>
 
                 <div x-show="selectedOrder?.ownerId === myId" class="border border-blue-500/30 p-6 rounded-3xl">
-                    <p class="text-[10px] text-blue-400 uppercase font-black mb-4">Update Asking Price</p>
-                    <div class="flex gap-2">
-                        <input type="number" x-model="counterAmount" placeholder="New Price" class="bg-black border border-white/10 p-3 rounded-xl flex-1 outline-none text-sm font-mono">
+                    <p class="text-[10px] text-blue-400 uppercase font-black mb-3">Seller Dashboard</p>
+                    <div class="flex gap-2 mb-4">
+                        <input type="number" x-model="counterAmount" placeholder="Update Price" class="bg-black border border-white/10 p-3 rounded-xl flex-1 outline-none text-sm font-mono">
                         <button @click="sendCounter" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase">Update</button>
                     </div>
+                    <button @click="cancelListing" class="w-full border border-red-500/50 text-red-500 py-3 rounded-xl font-black text-[10px] uppercase hover:bg-red-500/10">Cancel Listing (No Fee)</button>
                 </div>
-            </div>
 
-            <button @click="executeDeal(selectedOrder.currentBid || selectedOrder.price)" 
-                class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase text-xs tracking-widest">
-                <span x-text="getExecutionText()"></span>
-            </button>
+                <button @click="executeDeal(selectedOrder.currentBid || selectedOrder.price)" 
+                    :disabled="selectedOrder?.ownerId === myId && !selectedOrder?.currentBid"
+                    :class="selectedOrder?.ownerId === myId && !selectedOrder?.currentBid ? 'opacity-30 cursor-not-allowed bg-slate-800' : 'bg-blue-600 hover:bg-blue-500'"
+                    class="w-full py-5 rounded-2xl font-black uppercase text-xs tracking-widest transition-all">
+                    <span x-text="getButtonText()"></span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -96,7 +97,7 @@
             return {
                 orders: [], newItem: '', newPrice: '', newType: 'SELL', selectedOrder: null, bidAmount: '', counterAmount: '',
                 myId: localStorage.getItem('lmh_user_id') || (function(){
-                    const id = 'U' + Math.floor(Math.random()*10000);
+                    const id = 'U-' + Math.floor(1000 + Math.random() * 9000);
                     localStorage.setItem('lmh_user_id', id); return id;
                 })(),
 
@@ -106,18 +107,12 @@
                     });
                 },
 
-                getExecutionText() {
+                getButtonText() {
                     if (!this.selectedOrder) return '';
-                    if (this.selectedOrder.ownerId === this.myId) return 'Accept & Close Deal';
-                    // If listing is a "SELL", the external user "BUYS"
+                    if (this.selectedOrder.ownerId === this.myId) {
+                        return this.selectedOrder.currentBid ? 'Accept Highest Bid' : 'Waiting for Bids...';
+                    }
                     return this.selectedOrder.type === 'SELL' ? 'Buy Now at Asking Price' : 'Sell Now at Asking Price';
-                },
-
-                getGuardrailText() {
-                    if (!this.selectedOrder) return '';
-                    return this.selectedOrder.type === 'SELL' 
-                        ? `* Note: Max bid allowed is $${this.selectedOrder.price}`
-                        : `* Note: Min bid allowed is $${this.selectedOrder.price}`;
                 },
 
                 addOrder() {
@@ -125,32 +120,26 @@
                     const id = Date.now();
                     db.ref('listings/' + id).set({
                         id, item: this.newItem.toUpperCase(), price: parseFloat(this.newPrice),
-                        type: this.newType, ownerId: this.myId, timestamp: Date.now()
+                        type: this.newType, ownerId: this.myId
                     });
                     this.newItem = ''; this.newPrice = '';
                 },
 
+                cancelListing() {
+                    if(confirm("Are you sure you want to cancel this listing?")) {
+                        db.ref('listings/' + this.selectedOrder.id).remove();
+                        this.selectedOrder = null;
+                    }
+                },
+
                 placeBid() {
                     const bid = parseFloat(this.bidAmount);
-                    const ask = this.selectedOrder.price;
-                    
-                    // SELL logic guardrail
-                    if (this.selectedOrder.type === 'SELL' && bid > ask) {
-                        alert(`Error: You are trying to bid $${bid} for an item that only costs $${ask}. Just use the "Buy Now" button!`);
-                        return;
-                    }
-                    // BUY logic guardrail
-                    if (this.selectedOrder.type === 'BUY' && bid < ask) {
-                        alert(`Error: The buyer is willing to pay $${ask}. Don't bid $${bid} and lose money! Just use the "Sell Now" button.`);
-                        return;
-                    }
-
+                    if (this.selectedOrder.type === 'SELL' && bid > this.selectedOrder.price) { alert("Use Buy Now!"); return; }
                     db.ref('listings/' + this.selectedOrder.id).update({ currentBid: bid });
-                    this.bidAmount = ''; alert("Bid recorded.");
+                    this.bidAmount = ''; alert("Bid sent!");
                 },
 
                 sendCounter() {
-                    if(!this.counterAmount) return;
                     db.ref('listings/' + this.selectedOrder.id).update({
                         price: parseFloat(this.counterAmount), currentBid: null
                     });
@@ -158,7 +147,7 @@
                 },
 
                 executeDeal(f) {
-                    alert(`TRADE CLEARED: $${f}\nFee: $${(f*0.0099).toFixed(2)}`);
+                    alert(`DEAL CLOSED: $${f}\nFee: $${(f*0.0099).toFixed(2)}`);
                     db.ref('listings/' + this.selectedOrder.id).remove();
                     this.selectedOrder = null;
                 }
