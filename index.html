@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LiquidMarketHub | v4.0 Pro</title>
+    <title>LiquidityMarketHub | Professional Trading</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
@@ -17,15 +17,15 @@
 
     <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="bg-[#0f1218] border-r border-white/5 flex flex-col transition-all duration-300 z-50 shadow-2xl">
         <div class="p-6 flex items-center justify-between">
-            <h1 x-show="sidebarOpen" class="text-white font-black italic text-sm tracking-tighter uppercase">LIQUID HUB</h1>
+            <h1 x-show="sidebarOpen" class="text-white font-black italic text-sm tracking-tighter uppercase">LiquidityMarketHub</h1>
             <button @click="sidebarOpen = !sidebarOpen" class="p-2 hover:bg-white/5 rounded-lg text-white">☰</button>
         </div>
         <nav class="mt-10 flex-1 px-4 space-y-4">
             <button @click="view = 'market'" :class="view === 'market' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400'" class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
-                <span>🛒</span> <span x-show="sidebarOpen" class="text-[10px] font-black uppercase tracking-widest ml-2">Market</span>
+                <span>🛒</span> <span x-show="sidebarOpen" class="text-[10px] font-black uppercase tracking-widest ml-2">Market Depth</span>
             </button>
             <button @click="view = 'chats'" :class="view === 'chats' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400'" class="w-full flex items-center gap-4 p-4 rounded-2xl transition-all">
-                <span>💬</span> <span x-show="sidebarOpen" class="text-[10px] font-black uppercase tracking-widest ml-2">Chats</span>
+                <span>💬</span> <span x-show="sidebarOpen" class="text-[10px] font-black uppercase tracking-widest ml-2">Active Chats</span>
             </button>
         </nav>
     </aside>
@@ -35,10 +35,10 @@
             <div x-cloak>
                 <header class="mb-10 flex justify-between items-end">
                     <div>
-                        <h2 class="text-5xl font-black text-white italic tracking-tighter uppercase">Market Depth</h2>
+                        <h2 class="text-5xl font-black text-white italic tracking-tighter uppercase">LIQUIDITY HUB</h2>
                         <p class="text-blue-500 text-[10px] font-mono mt-1 font-bold" x-text="'USER_ID: ' + myId"></p>
                     </div>
-                    <button @click="showPostModal = true" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase shadow-2xl hover:scale-105 transition-all">Post Listing +</button>
+                    <button @click="showPostModal = true" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase shadow-2xl hover:scale-105 transition-all">Launch Listing +</button>
                 </header>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -48,14 +48,14 @@
                                 <template x-if="order.img">
                                     <img :src="order.img" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500">
                                 </template>
-                                <div class="absolute top-5 left-5 px-4 py-2 bg-black/90 rounded-full border border-white/10 text-[9px] font-black uppercase text-white" x-text="order.ownerId === myId ? order.type + ' (YOU)' : order.type"></div>
+                                <div class="absolute top-5 left-5 px-4 py-2 bg-black/90 rounded-full border border-white/10 text-[9px] font-black uppercase text-white" x-text="order.ownerId === myId ? order.type + ' (OWNER)' : order.type"></div>
                             </div>
                             <div class="p-8">
                                 <div class="flex justify-between items-start mb-2">
                                     <h3 class="text-white font-black text-xl uppercase tracking-tighter" x-text="order.item"></h3>
                                     <span class="text-2xl font-black font-mono text-blue-500" x-text="'$' + order.price"></span>
                                 </div>
-                                <p class="text-green-400 text-[10px] font-bold mb-4 uppercase tracking-widest" x-show="order.currentBid" x-text="'Bid: $' + order.currentBid"></p>
+                                <p class="text-green-400 text-[10px] font-bold mb-4 uppercase tracking-widest" x-show="order.currentBid" x-text="'Top Bid: $' + order.currentBid"></p>
                                 <div class="flex gap-3">
                                     <button @click="selectedOrder = order" class="flex-1 bg-white text-black py-4 rounded-2xl font-black text-[10px] uppercase hover:bg-blue-600 hover:text-white transition-all">Trade Hub</button>
                                     <button @click="openChat(order)" class="px-6 bg-white/5 border border-white/10 text-white py-4 rounded-2xl hover:bg-blue-600 transition-all">💬</button>
@@ -69,13 +69,13 @@
 
         <template x-if="view === 'chats'">
             <div class="h-full flex flex-col" x-cloak>
-                <h2 class="text-3xl font-black text-white mb-8 uppercase italic">Conversations</h2>
+                <h2 class="text-3xl font-black text-white mb-8 uppercase italic">Secure Messages</h2>
                 <div class="flex-1 bg-[#0f1218] rounded-[40px] border border-white/5 flex flex-col md:flex-row overflow-hidden shadow-2xl">
                     <div class="w-full md:w-80 border-r border-white/5 p-6 overflow-y-auto bg-black/20">
                         <template x-for="chat in chatRooms" :key="chat.id">
                             <div @click="activeChat = chat" :class="activeChat?.id === chat.id ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-white/5 text-slate-400'" class="p-5 rounded-[24px] cursor-pointer mb-3 transition-all">
                                 <p class="text-[11px] font-black uppercase tracking-widest" x-text="chat.item"></p>
-                                <p class="text-[9px] opacity-60 mt-1">Live Sync</p>
+                                <p class="text-[9px] opacity-60 mt-1" x-text="chat.buyerId === myId ? 'Buying' : 'Selling'"></p>
                             </div>
                         </template>
                     </div>
@@ -90,8 +90,8 @@
                                     </template>
                                 </div>
                                 <div class="flex gap-3">
-                                    <input type="text" x-model="chatInput" @keyup.enter="sendChatMsg" placeholder="Type message..." class="bg-black/50 border border-white/10 p-5 rounded-2xl flex-1 outline-none text-sm text-white focus:border-blue-600 transition-all">
-                                    <button @click="sendChatMsg" class="bg-blue-600 text-white px-10 rounded-2xl font-black uppercase text-[10px] tracking-widest">Send</button>
+                                    <input type="text" x-model="chatInput" @keyup.enter="sendChatMsg" placeholder="Type a message..." class="bg-black border border-white/10 p-5 rounded-2xl flex-1 outline-none text-sm text-white focus:border-blue-600 transition-all">
+                                    <button @click="sendChatMsg" class="bg-blue-600 text-white px-10 rounded-2xl font-black uppercase text-[10px]">Send</button>
                                 </div>
                             </div>
                         </template>
@@ -108,29 +108,29 @@
                 <button @click="selectedOrder = null" class="text-slate-500 hover:text-white text-4xl">&times;</button>
             </div>
 
-            <p class="text-slate-400 text-sm mb-8 leading-relaxed italic" x-text="selectedOrder?.desc || 'No description provided.'"></p>
+            <p class="text-slate-400 text-sm mb-8 italic" x-text="selectedOrder?.desc || 'No description provided.'"></p>
 
             <div class="space-y-6">
                 <div x-show="selectedOrder?.ownerId === myId" class="border border-blue-600/30 bg-blue-600/5 p-8 rounded-[32px]">
                     <div class="flex justify-between items-center mb-4">
-                        <p class="text-[10px] text-blue-400 uppercase font-black">Owner Dashboard</p>
-                        <p class="text-green-400 text-[10px] font-black" x-show="selectedOrder?.currentBid" x-text="'Top Bid: $' + selectedOrder?.currentBid"></p>
+                        <p class="text-[10px] text-blue-400 uppercase font-black">Management Panel</p>
+                        <p class="text-green-400 text-[10px] font-black" x-show="selectedOrder?.currentBid" x-text="'High Bid: $' + selectedOrder?.currentBid"></p>
                     </div>
                     <div class="flex gap-2 mb-4">
-                        <input type="number" x-model="counterAmount" placeholder="Update Price" class="bg-black border border-white/10 p-4 rounded-xl flex-1 outline-none text-sm font-mono text-white">
+                        <input type="number" x-model="counterAmount" placeholder="New Price" class="bg-black border border-white/10 p-4 rounded-xl flex-1 outline-none text-sm font-mono text-white">
                         <button @click="sendCounter" class="bg-blue-600 text-white px-6 rounded-xl font-black text-[10px] uppercase">Update</button>
                     </div>
                     <button @click="cancelListing" class="w-full border border-red-500/50 text-red-500 py-4 rounded-2xl font-black text-[10px] uppercase hover:bg-red-500 hover:text-white transition-all">Cancel Post</button>
                 </div>
 
                 <div x-show="selectedOrder?.ownerId !== myId" class="bg-white/5 p-8 rounded-[32px] border border-white/5">
-                    <p class="text-[10px] text-slate-500 uppercase font-black mb-4">Negotiate</p>
+                    <p class="text-[10px] text-slate-500 uppercase font-black mb-4">Market Action</p>
                     <div class="flex gap-3 mb-6">
-                        <input type="number" x-model="bidAmount" placeholder="Your Bid" class="bg-black border border-white/10 p-4 rounded-xl flex-1 outline-none text-sm font-mono text-white">
+                        <input type="number" x-model="bidAmount" placeholder="Bid Amount" class="bg-black border border-white/10 p-4 rounded-xl flex-1 outline-none text-sm font-mono text-white">
                         <button @click="placeBid" class="bg-white text-black px-8 rounded-xl font-black text-[10px] uppercase hover:bg-blue-600 hover:text-white transition-all">Bid</button>
                     </div>
                     <button @click="executeDeal(selectedOrder.price)" class="w-full py-6 rounded-3xl font-black uppercase text-xs bg-blue-600 text-white shadow-2xl hover:bg-blue-500 transition-all">
-                        Instant Buy $<span x-text="selectedOrder?.price"></span>
+                        Accept Price $<span x-text="selectedOrder?.price"></span>
                     </button>
                 </div>
             </div>
@@ -145,12 +145,12 @@
                     <input type="text" x-model="newItem" placeholder="Item Name" class="bg-black border border-white/10 p-5 rounded-2xl outline-none text-white text-sm">
                     <input type="number" x-model="newPrice" placeholder="Price ($)" class="bg-black border border-white/10 p-5 rounded-2xl outline-none text-white text-sm font-mono">
                 </div>
-                <textarea x-model="newDesc" placeholder="Detailed Description..." class="w-full bg-black border border-white/10 p-5 rounded-2xl h-32 outline-none text-white text-sm focus:border-blue-600"></textarea>
-                <input type="text" x-model="newImgUrl" placeholder="Image URL (imgur, etc)" class="w-full bg-black border border-white/10 p-5 rounded-2xl outline-none text-white text-xs font-mono">
+                <textarea x-model="newDesc" placeholder="Provide detailed description..." class="w-full bg-black border border-white/10 p-5 rounded-2xl h-32 outline-none text-white text-sm focus:border-blue-600"></textarea>
+                <input type="text" x-model="newImgUrl" placeholder="Image Link (e.g. imgur)" class="w-full bg-black border border-white/10 p-5 rounded-2xl outline-none text-white text-xs font-mono">
                 <div class="flex gap-4 pt-4">
                     <select x-model="newType" class="bg-black border border-white/10 p-5 rounded-2xl outline-none text-[10px] font-bold text-slate-400 uppercase">
-                        <option value="SELL">SELLING</option>
-                        <option value="BUY">BUYING</option>
+                        <option value="SELL">I'm Selling</option>
+                        <option value="BUY">I'm Buying</option>
                     </select>
                     <button @click="addOrder" class="flex-1 bg-blue-600 text-white py-5 rounded-2xl font-black text-[10px] uppercase shadow-xl hover:bg-blue-500 transition-all">Launch</button>
                 </div>
@@ -173,14 +173,14 @@
                 newItem: '', newPrice: '', newDesc: '', newType: 'SELL', newImgUrl: '',
                 bidAmount: '', counterAmount: '', chatRooms: [], activeChat: null, activeChatMessages: [], chatInput: '',
                 myId: localStorage.getItem('lmh_user_id') || (function(){
-                    const id = 'U-'+Math.floor(1000+Math.random()*9000);
+                    const id = 'U-'+Math.floor(1000+Math.random()*9999);
                     localStorage.setItem('lmh_user_id', id); return id;
                 })(),
 
                 init() {
                     db.ref('listings').on('value', s => {
                         const d = s.val(); this.orders = d ? Object.values(d).reverse() : [];
-                        if(this.selectedOrder) { // Real-time update for modal
+                        if(this.selectedOrder) { 
                             this.selectedOrder = this.orders.find(o => o.id === this.selectedOrder.id) || null;
                         }
                     });
@@ -213,13 +213,13 @@
                 placeBid() {
                     if(!this.bidAmount) return;
                     db.ref('listings/' + this.selectedOrder.id).update({ currentBid: parseFloat(this.bidAmount) });
-                    this.bidAmount = ''; alert("Offer Sent to Owner.");
+                    this.bidAmount = ''; alert("Offer Recorded.");
                 },
 
                 sendCounter() {
                     if(!this.counterAmount) return;
                     db.ref('listings/' + this.selectedOrder.id).update({ price: parseFloat(this.counterAmount), currentBid: null });
-                    this.counterAmount = ''; alert("Price Synchronized.");
+                    this.counterAmount = ''; alert("Price Updated and Synced.");
                 },
 
                 cancelListing() {
@@ -229,8 +229,10 @@
                 },
 
                 executeDeal(price) {
+                    const fee = price * 0.0099;
+                    const total = price - fee;
                     db.ref('listings/' + this.selectedOrder.id).remove().then(() => {
-                        alert(`TRADE COMPLETE\nCleaning sync cache...`);
+                        alert(`TRADE EXECUTED\nAsking Price: $${price}\nFee (0.99%): -$${fee.toFixed(2)}\nNet Total: $${total.toFixed(2)}`);
                         location.reload();
                     });
                 },
@@ -238,7 +240,7 @@
                 openChat(order) {
                     const roomId = [this.myId, order.ownerId, order.id].sort().join('_');
                     const roomData = { id: roomId, item: order.item, buyerId: this.myId, sellerId: order.ownerId };
-                    db.ref('chats/' + roomId).update(roomData); // Use update to preserve existing rooms
+                    db.ref('chats/' + roomId).update(roomData);
                     this.activeChat = roomData;
                     this.view = 'chats';
                 },
@@ -246,8 +248,9 @@
                 sendChatMsg() {
                     if(!this.chatInput || !this.activeChat) return;
                     const msgData = { sender: this.myId, text: this.chatInput, time: Date.now() };
-                    db.ref('messages/' + this.activeChat.id).push(msgData);
-                    this.chatInput = '';
+                    db.ref('messages/' + this.activeChat.id).push(msgData).then(() => {
+                        this.chatInput = '';
+                    });
                 }
             }
         }
