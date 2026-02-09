@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LiquidityMarketHub | v5.0 Pro</title>
+    <title>LiquidityMarketHub | v5.0 Pro Restored</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
@@ -170,19 +170,19 @@
                 })(),
 
                 init() {
-                    // Listings sorted by ID (timestamp) desc
                     db.ref('listings').on('value', s => {
                         const d = s.val(); 
                         this.orders = d ? Object.values(d).sort((a,b) => b.id - a.id) : [];
                         if(this.selectedOrder) this.selectedOrder = this.orders.find(o => o.id === this.selectedOrder.id) || null;
                     });
-                    // Chat Rooms sorted by lastMessageAt desc (WhatsApp Logic)
+
                     db.ref('chats').on('value', s => {
                         const d = s.val() || {};
                         this.chatRooms = Object.values(d)
                             .filter(r => r.buyerId === this.myId || r.sellerId === this.myId)
                             .sort((a,b) => (b.lastMessageAt || 0) - (a.lastMessageAt || 0));
                     });
+
                     this.$watch('activeChat', (room) => {
                         if(!room) return;
                         db.ref('messages/' + room.id).on('value', s => {
@@ -231,8 +231,10 @@
 
                 openChat(order) {
                     const roomId = [this.myId, order.ownerId, order.id].sort().join('_');
-                    const roomData = { id: roomId, item: order.item, buyerId: this.myId, sellerId: order.ownerId, lastMessageAt: Date.now() };
-                    db.ref('chats/' + roomId).update(roomData); // Ensure room exists with timestamp
+                    const roomData = { id: roomId, item: order.item, buyerId: this.myId, sellerId: order.ownerId };
+                    
+                    // Use update so we don't overwrite lastMessageAt if the room already exists
+                    db.ref('chats/' + roomId).update(roomData);
                     this.activeChat = roomData;
                     this.view = 'chats';
                 },
@@ -242,9 +244,10 @@
                     const txt = this.chatInput;
                     const time = Date.now();
                     this.chatInput = '';
+                    
                     // 1. Push Message
                     db.ref('messages/' + this.activeChat.id).push({ sender: this.myId, text: txt, time: time });
-                    // 2. Update Room Timestamp to force WhatsApp-style sorting
+                    // 2. Update Timestamp for sorting
                     db.ref('chats/' + this.activeChat.id).update({ lastMessageAt: time });
                 }
             }
